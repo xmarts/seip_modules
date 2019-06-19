@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+    <openerp>
+        <data>
+            <record id="invoice_oehealth_tree" model="ir.ui.view">
+                <field name="name">account.invoice.oehealth.tree</field>
+                <field name="model">account.invoice</field>
+                <field name="arch" type="xml">
+                    <tree decoration-info="state == 'draft'" decoration-muted="state == 'cancel'" string="Invoice">
+                        <field name="partner_id" groups="base.group_user" string="Customer"/>
+                        <field name="date_invoice"/>
+                        <field name="number"/>
+                        <field name="commercial_partner_id" invisible="1"/>
+                        <field name="reference" invisible="1"/>
+                        <field name="name" invisible="1"/>
+                        <field name="journal_id" invisible="1"/>
+                        <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}"/>
+                        <field name="user_id"/>
+                        <field name="date_due"/>
+                        <field name="origin"/>
+                        <field name="amount_total_signed" string="Total" sum="Total"/>
+                        <field name="residual_signed" string="Amount Due" sum="Amount Due"/>
+                        <field name="currency_id" invisible="1"/>
+                        <field name="company_currency_id" invisible="1"/>
+                        <field name="state"/>
+                        <field name="type" invisible="context.get('type',True)"/>
+                    </tree>
+                </field>
+            </record>
+
+            <record id="action_invoice_oehealth_tree" model="ir.actions.act_window">
+                <field name="name">Invoices</field>
+                <field name="res_model">account.invoice</field>
+                <field name="view_type">form</field>
+                <field name="view_mode">tree,form</field>
+                <field name="view_id" ref="invoice_oehealth_tree"/>
+                <field name="context">{'type':'out_invoice'}</field>
+            </record>
+
+            <record id="view_account_payment_oehealth_tree" model="ir.ui.view">
+                <field name="name">account.payment.tree</field>
+                <field name="model">account.payment</field>
+                <field name="arch" type="xml">
+                    <tree decoration-info="state == 'draft'" decoration-muted="state in ['reconciled', 'cancelled']" edit="false">
+                        <field name="payment_date"/>
+                        <field name="name"/>
+                        <field name="journal_id"/>
+                        <field name="payment_method_id"/>
+                        <field name="partner_id" string="Customer"/>
+                        <field name="amount" sum="Amount"/>
+                        <field name="state"/>
+                        <field name="company_id" groups="base.group_multi_company"/>
+                        <field name="currency_id" invisible="1"/>
+                        <field name="partner_type" invisible="1"/>
+                    </tree>
+                </field>
+            </record>
+
+            <record id="action_account_oehealth_payments" model="ir.actions.act_window">
+                <field name="name">Payments</field>
+                <field name="res_model">account.payment</field>
+                <field name="view_type">form</field>
+                <field name="view_mode">tree,kanban,form,graph</field>
+                <field name="context">{'default_payment_type': 'inbound', 'default_partner_type': 'customer'}</field>
+                <field name="domain">[('partner_type', '=', 'customer')]</field>
+                <field name="view_id" ref="view_account_payment_oehealth_tree"/>
+                <field name="help" type="html">
+                    <p class="oe_view_nocontent_create">
+                      Click to register a payment
+                    </p><p>
+                      Payments are used to register liquidity movements (send, collect or transfer money).
+                      You can then process those payments by your own means or by using installed facilities.
+                    </p>
+                </field>
+            </record>
+
+
+            <menuitem name="Pagos/Facturas" id="oeh_medical_pagos_facturas" parent="oehealth.oeh_medical_menu" sequence="11"/>
+
+            <record id="action_oeh_medical_payments_action_tree_search" model="ir.actions.server" >
+                <field name="name">Pagos</field>
+                <field name="model_id" ref="model_account_payment"/>
+                <field name="state">code</field>
+                <field name="code">
+                    action = model.oeh_payments_searchs()
+                </field>
+            </record>
+            <record id="action_oeh_medical_invoices_action_tree_search" model="ir.actions.server" >
+                <field name="name">Facturas</field>
+                <field name="model_id" ref="model_account_invoice"/>
+                <field name="state">code</field>
+                <field name="code">
+                    action = model.oeh_invoices_searchs()
+                </field>
+            </record>
+
+            <menuitem name="Pagos" action="action_oeh_medical_payments_action_tree_search" id="oeh_medical_pagos" parent="oeh_medical_pagos_facturas" sequence="21"/>
+            <menuitem name="Facturas" action="action_oeh_medical_invoices_action_tree_search" id="oeh_medical_facturas" parent="oeh_medical_pagos_facturas" sequence="22"/>
+        </data>
+    </openerp>
